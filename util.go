@@ -38,3 +38,52 @@ func multibyteString(data []byte) (str string) {
 
 	return
 }
+
+// from7BitMulti converts 7 bit encoded data to 8 bit.
+func From7BitMulti(data []byte) []byte {
+  var i uint
+  res := make([]byte, 0)
+  var shift uint = 0
+  for i = 0 ; int(i) < len(data)-3 ; i++ {
+    if i > 0 && i % 7 == 0 {
+      i++
+    }
+    j := i + 2
+    d := data[j] >> shift
+    d |= data[j+1] << (7-shift)
+    shift++
+    if shift > 6 {
+      shift = 0
+    }
+    res = append(res, d)
+  }
+  return res
+}
+
+// to7BitMulti converts 8 bit encoded data to 7 bit.
+func To7BitMulti(data []byte) []byte {
+  var i uint
+  var prev byte
+  var res []byte
+  var shift uint = 0
+  for i = 0 ; int(i) < len(data) ; i++ {
+    if shift == 0 {
+      res = append(res, data[i] & 0x7f)
+      shift++
+      prev = data[i] >> 7
+    } else {
+      res = append(res, ((data[i] << shift) & 0x7f) | prev)
+      if shift == 6 {
+        res = append(res, data[i] >> 1)
+        shift = 0
+      } else {
+        shift++
+        prev = data[i] >> (8 - shift)
+      }
+    }
+  }
+  if shift > 0 {
+    res = append(res, prev)
+  }
+  return res
+}

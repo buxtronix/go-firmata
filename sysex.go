@@ -83,6 +83,8 @@ func (c *FirmataClient) parseSysEx(data []byte) {
 		c.parseSerialResponse(data)
 	case cmd == SysExSPI:
 		c.parseSPIResponse(data)
+	case cmd == SysExOneWire:
+		c.parseOWResponse(data)
 	default:
 		c.Log.Debug("Discarding unexpected SysEx command %v", cmd)
 	}
@@ -100,7 +102,7 @@ func (c *FirmataClient) sendSysEx(cmd SysExCommand, data ...byte) (err error) {
 	for _, b := range b.Bytes() {
 		bStr = bStr + fmt.Sprintf(" %#2x", b)
 	}
-	c.Log.Trace("SysEx send %v\n", bStr)
+  c.Log.Trace("SysEx send %v: %v\n", cmd, bStr)
 
 	_, err = b.WriteTo(*(c.conn))
 	return

@@ -63,6 +63,7 @@ const (
 	SysExRealtime         SysExCommand = 0x7F // MIDI Reserved for realtime messages
 	Serial                SysExCommand = 0x60
 	SysExSPI              SysExCommand = 0x80
+  SysExOneWire          SysExCommand = 0x73 // Send a onewire request
 
 	SerialConfig SerialSubCommand = 0x10
 	SerialComm   SerialSubCommand = 0x20
@@ -76,6 +77,20 @@ const (
 	SPI_MODE1 = 0x04
 	SPI_MODE2 = 0x08
 	SPI_MODE3 = 0x0C
+
+  OneWireConfig OneWireSubCommand = 0x41
+  OneWireSearch OneWireSubCommand = 0x40
+  OneWireSearchAlarms OneWireSubCommand = 0x44
+
+  OneWirePowerNormal = 0x0
+  OneWirePowerParasitic = 0x1
+
+  OW_RESET = 0x1
+  OW_SKIP = 0x2
+  OW_SELECT = 0x4
+  OW_READ = 0x8
+  OW_DELAY = 0x10
+  OW_WRITE = 0x20
 
 	SoftSerial  SerialPort = 0x00
 	HardSerial1 SerialPort = 0x01
@@ -177,6 +192,8 @@ func (c SysExCommand) String() string {
 		return fmt.Sprintf("Serial (0x%x)", byte(c))
 	case c == SysExSPI:
 		return fmt.Sprintf("SPI (0x%x)", byte(c))
+	case c == SysExOneWire:
+		return fmt.Sprintf("OneWire (0x%x)", byte(c))
 	}
 	return fmt.Sprintf("Unexpected SysEx command (0x%x)", byte(c))
 }

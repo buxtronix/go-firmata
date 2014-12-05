@@ -47,28 +47,31 @@ type FirmataClient struct {
   valueChan  chan FirmataValue
   serialChan chan string
   spiChan    chan []byte
+  owChan    chan []byte
 }
 
 // Creates a new FirmataClient object and connects to the Arduino board
 // over specified serial port. This function blocks till a connection is
 // succesfullt established and pin mappings are retrieved.
-func NewClient(dev string, baud int) (client *FirmataClient, err error) {
+func NewClient(dev string, baud int, ch chan FirmataValue) (client *FirmataClient, err error) {
   var conn io.ReadWriteCloser
 
   c := &serial.Config{Name: dev, Baud: baud}
   conn, err = serial.OpenPort(c)
   if err != nil {
-    client.Log.Critical(err)
+    client.Log.Critical("Port open: %s", err.Error())
     return
   }
+  time.Sleep(1 * time.Second)
 
-  logger := make(log4go.Logger) 
-  logger.AddFilter("stdout", log4go.INFO, log4go.NewConsoleLogWriter())
+  logger := make(log4go.Logger)
+  logger.AddFilter("stdout", log4go.FINE, log4go.NewConsoleLogWriter())
   client = &FirmataClient{
     serialDev: dev,
     baud:      baud,
     conn:      &conn,
     Log:       &logger,
+    valueChan:  ch,
   }
   go client.replyReader()
 
@@ -208,4 +211,15 @@ func (c *FirmataClient) SetAnalogSamplingInterval(ms byte) (err error) {
 // Get the channel to retrieve analog and digital pin values
 func (c *FirmataClient) GetValues() <-chan FirmataValue {
   return c.valueChan
+}
+
+// ServoConfig configures servo parameters for the given pin.
+func (c *FirmataClient) ServoConfig(pin byte, minPulse int16, maxPulse int16) error {
+  var dataOut []byte
+  mnpbl := byte(minPulse & 0xff)
+  mnpbm := byte(minPulse >> 8 & 0xff)
+  mxpbl := byte(maxPulse & 0xff)
+  mxpbm := byte(maxPulse >> 8 & 0xff)
+  dataOut = append(dataOut, pin, mnpbl, mnpbm, mxpbl, mxpbm)
+  return c.sendSysEx(ServoConfig, dataOut...)
 }

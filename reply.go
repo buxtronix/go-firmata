@@ -67,13 +67,13 @@ func (v FirmataValue) String() string {
 
 func (c *FirmataClient) replyReader() {
 	r := bufio.NewReader(*c.conn)
-	c.valueChan = make(chan FirmataValue)
+	//c.valueChan = make(chan FirmataValue)
 	var init bool
 
 	for {
 		b, err := (r.ReadByte())
 		if err != nil {
-			c.Log.Critical(err)
+      c.Log.Critical("Read: %s", err.Error())
 			return
 		}
 
@@ -99,7 +99,9 @@ func (c *FirmataClient) replyReader() {
 			sysExData, err = r.ReadSlice(byte(EndSysEx))
 			if err == nil {
 				c.parseSysEx(sysExData[0 : len(sysExData)-1])
-			}
+			} else {
+        c.Log.Critical("parseSysEx: %s", err.Error())
+      }
 		case (cmd&DigitalMessage) > 0 || byte(cmd&AnalogMessage) > 0:
 			b1, _ := r.ReadByte()
 			b2, _ := r.ReadByte()
