@@ -212,14 +212,3 @@ func (c *FirmataClient) SetAnalogSamplingInterval(ms byte) (err error) {
 func (c *FirmataClient) GetValues() <-chan FirmataValue {
   return c.valueChan
 }
-
-// ServoConfig configures servo parameters for the given pin.
-func (c *FirmataClient) ServoConfig(pin byte, minPulse int16, maxPulse int16) error {
-  var dataOut []byte
-  mnpbl := byte(minPulse & 0xff)
-  mnpbm := byte(minPulse >> 8 & 0xff)
-  mxpbl := byte(maxPulse & 0xff)
-  mxpbm := byte(maxPulse >> 8 & 0xff)
-  dataOut = append(dataOut, pin, mnpbl, mnpbm, mxpbl, mxpbm)
-  return c.sendSysEx(ServoConfig, dataOut...)
-}

@@ -1,0 +1,26 @@
+// Copyright 2014 Krishna Raman
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package firmata
+
+// ServoConfig configures servo parameters for the given pin.
+func (c *FirmataClient) ServoConfig(pin byte, minPulse int16, maxPulse int16) error {
+  var dataOut []byte
+  mnpbl := byte(minPulse & 0xff)
+  mnpbm := byte(minPulse >> 8 & 0xff)
+  mxpbl := byte(maxPulse & 0xff)
+  mxpbm := byte(maxPulse >> 8 & 0xff)
+  dataOut = append(dataOut, pin, mnpbl, mnpbm, mxpbl, mxpbm)
+  return c.sendSysEx(ServoConfig, dataOut...)
+}
